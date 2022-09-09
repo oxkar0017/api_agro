@@ -5,52 +5,56 @@ from flask_restful import abort, Api, Resource
 app = Flask(__name__)
 api = Api(app)
 
-TODOS = {
-    'todo1': {'task': 'build an API'},
-    'todo2': {'task': '?????'},
-    'todo3': {'task': 'profit!'},
-}
+REGISTROS = {
+    '1': {'valor': '10', 'tipo': 'temperatura'},
+    '2': {'valor': '60', 'tipo': 'humedad'},
+    '3': {'valor': '40', 'tipo': 'temperatura'},
+    '4': {'valor': '80', 'tipo': 'humedad'}}
 
 
-def abort_if_todo_doesnt_exist(todo_id):
-    if todo_id not in TODOS:
-        abort(404, message="Todo {} doesn't exist".format(todo_id))
+def abortar_si_no_existe_registro(id_registro):
+    if id_registro not in REGISTROS:
+        abort(404, message=f"No existe registro con id {id_registro}")
 
 
-# Todo
-# shows a single todo item and lets you delete a todo item
-class Todo(Resource):
-    def get(self, todo_id):
-        abort_if_todo_doesnt_exist(todo_id)
-        return TODOS[todo_id]
+# Registro
+# Muestra, borra o crea un registro en REGISTROS
+class Registro(Resource):
+    def get(self, id_registro):
+        abortar_si_no_existe_registro(id_registro)
+        return REGISTROS[id_registro]
 
-    def delete(self, todo_id):
-        abort_if_todo_doesnt_exist(todo_id)
-        del TODOS[todo_id]
+    def delete(self, id_registro):
+        abortar_si_no_existe_registro(id_registro)
+        del REGISTROS[id_registro]
         return '', 204
 
-    def put(self, todo_id):
-        task = {'task': request.args.get('task')}
-        TODOS[todo_id] = task
-        return task, 201
+    def put(self, id_registro):
+        REGISTROS[id_registro] = {
+            'valor': request.args.get('valor'),
+            'tipo': request.args.get('tipo')}
+        return REGISTROS[id_registro], 201
 
 
-# TodoList
-# shows a list of all todos, and lets you POST to add new tasks
-class TodoList(Resource):
+# ListaRegistros
+# Muestra todos los registros y hace un POST de un nuevo registro
+class ListaRegistros(Resource):
     def get(self):
-        return TODOS
+        return REGISTROS
 
     def post(self):
-        todo_id = 'todo%d' % (len(TODOS) + 1)
-        TODOS[todo_id] = {'task': request.args.get('task')}
-        return TODOS[todo_id], 201
+        id_registro = int(max(REGISTROS.keys())) + 1
+        id_registro = f'{id_registro}'
+        REGISTROS[id_registro] = {
+            'valor': request.args.get('valor'),
+            'tipo': request.args.get('tipo')}
+        return REGISTROS[id_registro], 201
 
 ##
 ## Actually setup the Api resource routing here
 ##
-api.add_resource(TodoList, '/todos')
-api.add_resource(Todo, '/todos/<string:todo_id>')
+api.add_resource(ListaRegistros, '/registros')
+api.add_resource(Registro, '/registros/<string:id_registro>')
 
 
 if __name__ == '__main__':

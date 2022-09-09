@@ -1,5 +1,5 @@
 from flask import Flask, request
-from flask_restful import reqparse, abort, Api, Resource
+from flask_restful import abort, Api, Resource
 
 
 app = Flask(__name__)
@@ -42,8 +42,7 @@ class TodoList(Resource):
         return TODOS
 
     def post(self):
-        todo_id = int(max(TODOS.keys()).lstrip('todo')) + 1
-        todo_id = 'todo%i' % todo_id
+        todo_id = 'todo%d' % (len(TODOS) + 1)
         TODOS[todo_id] = {'task': request.args.get('task')}
         return TODOS[todo_id], 201
 
@@ -51,7 +50,7 @@ class TodoList(Resource):
 ## Actually setup the Api resource routing here
 ##
 api.add_resource(TodoList, '/todos')
-api.add_resource(Todo, '/todos/<todo_id>')
+api.add_resource(Todo, '/todos/<string:todo_id>')
 
 
 if __name__ == '__main__':
